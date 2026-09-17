@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>晶羽幼龙 · 桌面伙伴</title>
+  <style>
+    :root {
+      --bg0: #070b14;
+      --bg1: #0d1524;
+      --ink: #e8f1ff;
+      --muted: #8aa0c0;
+      --accent: #7ee0ff;
+      --accent2: #b48cff;
+      --card: rgba(18, 28, 48, 0.72);
+      --line: rgba(126, 224, 255, 0.18);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at 70% 20%, rgba(126, 224, 255, 0.12), transparent 55%),
+        radial-gradient(900px 600px at 20% 80%, rgba(180, 140, 255, 0.10), transparent 50%),
+        linear-gradient(165deg, var(--bg0), var(--bg1) 45%, #0a1220);
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+    .stars, .stars::before, .stars::after {
+      position: fixed; inset: 0; pointer-events: none; content: "";
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.55), transparent),
+        radial-gradient(1px 1px at 70% 15%, rgba(180,220,255,.5), transparent),
+        radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,255,255,.35), transparent),
+        radial-gradient(1px 1px at 85% 55%, rgba(200,180,255,.45), transparent),
+        radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,.3), transparent);
+      opacity: .55;
+    }
+    .stars::before { transform: translateY(-20px) scale(1.05); opacity: .35; }
+    .stars::after { transform: translateY(30px); opacity: .25; }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 36px 20px 48px;
+      display: grid;
+      gap: 22px;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+      background: linear-gradient(90deg, #9ef0ff, #d4b4ff 55%, #7ee0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .stage {
+      position: relative;
+      height: min(58vh, 480px);
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(ellipse 60% 45% at 50% 78%, rgba(126, 224, 255, 0.16), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 20%, rgba(180, 140, 255, 0.08), transparent 60%),
+        var(--card);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      backdrop-filter: blur(10px);
+    }
+    .glow {
+      position: absolute;
+      width: 280px; height: 90px;
+      bottom: 18%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(126,224,255,.35), transparent 70%);
+      filter: blur(8px);
+      animation: glowPulse 3.2s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0%, 100% { opacity: .55; transform: scaleX(1); }
+      50% { opacity: .9; transform: scaleX(1.08); }
+    }
+    .pet-wrap {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      animation: floatY 3.6s ease-in-out infinite;
+      filter: drop-shadow(0 18px 28px rgba(40, 120, 180, 0.35));
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+    .pet-wrap:active { cursor: grabbing; }
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    canvas#pet {
+      width: 280px;
+      height: 280px;
+      image-rendering: auto;
+      display: block;
+    }
+
+    .spark {
+      position: absolute;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #c8f4ff;
+      box-shadow: 0 0 12px #7ee0ff;
+      opacity: 0;
+      pointer-events: none;
+      animation: sparkRise 2.8s ease-in-out infinite;
+    }
+    @keyframes sparkRise {
+      0% { opacity: 0; transform: translateY(0) scale(.6); }
+      20% { opacity: .9; }
+      100% { opacity: 0; transform: translateY(-70px) scale(1.1); }
+    }
+
+    .panel {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .label {
+      min-width: 64px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    button.ghost {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(126, 224, 255, 0.06);
+      color: var(--ink);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+    button.ghost:hover {
+      background: rgba(126, 224, 255, 0.16);
+      border-color: rgba(126, 224, 255, 0.4);
+      transform: translateY(-1px);
+    }
+    button.ghost.active {
+      background: linear-gradient(135deg, rgba(126,224,255,.28), rgba(180,140,255,.28));
+      border-color: rgba(180, 220, 255, 0.55);
+      box-shadow: 0 0 0 1px rgba(126,224,255,.15), 0 8px 20px rgba(80, 160, 220, 0.18);
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .meta strong { color: var(--ink); font-weight: 600; margin-left: 6px; }
+    footer {
+      color: rgba(138, 160, 192, 0.75);
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.7;
+    }
+    .hint {
+      font-size: 12px;
+      color: rgba(138, 160, 192, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="wrap">
+    <header>
+      <h1>晶羽幼龙</h1>
+      <p>写实 3D 风格桌面伙伴预览 · 50 组动画 · 分类筛选 + 多选轮播</p>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="glow"></div>
+      <div class="pet-wrap" id="petWrap">
+        <canvas id="pet" width="256" height="256"></canvas>
+        <span class="spark" style="left:18%; top:35%; animation-delay:0s"></span>
+        <span class="spark" style="left:78%; top:42%; animation-delay:.7s"></span>
+        <span class="spark" style="left:60%; top:22%; animation-delay:1.3s"></span>
+        <span class="spark" style="left:30%; top:55%; animation-delay:1.9s"></span>
+      </div>
+      <div id="nowLabel" style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(18,28,48,.75);border:1px solid var(--line);color:var(--ink);font-size:13px;pointer-events:none;">待机呼吸</div>
+    </div>
+
+    <div class="panel">
+      <div class="row" id="catBtns" style="margin-bottom:4px;">
+        <span class="label">分类</span>
+        <button class="ghost active" data-cat="all">全部</button>
+        <button class="ghost" data-cat="basic">基础</button>
+        <button class="ghost" data-cat="act">动作</button>
+        <button class="ghost" data-cat="mood">情绪</button>
+        <button class="ghost" data-cat="fx">特效</button>
+      </div>
+      <div class="row" id="animBtns" style="max-height:220px;overflow:auto;align-content:flex-start;display:flex;flex-wrap:wrap;">
+        <span class="label" style="width:100%;margin-bottom:4px;">动画 <span class="hint" id="animHint"></span></span>
+        <button class="ghost active" data-anim="idle" data-cat="basic">待机呼吸</button>
+        <button class="ghost" data-anim="blink" data-cat="basic">眨眼张望</button>
+        <button class="ghost" data-anim="wing" data-cat="basic">晶翼舒展</button>
+        <button class="ghost" data-anim="bounce" data-cat="basic">开心跳跃</button>
+        <button class="ghost" data-anim="sleep" data-cat="basic">打盹睡觉</button>
+        <button class="ghost" data-anim="stretch" data-cat="basic">伸懒腰</button>
+        <button class="ghost" data-anim="sit" data-cat="basic">坐下摇尾</button>
+        <button class="ghost" data-anim="wave" data-cat="act">打招呼</button>
+        <button class="ghost" data-anim="walk" data-cat="act">小步走</button>
+        <button class="ghost" data-anim="fly" data-cat="act">悬停飞行</button>
+        <button class="ghost" data-anim="eat" data-cat="act">吃水晶</button>
+        <button class="ghost" data-anim="nod" data-cat="act">点头</button>
+        <button class="ghost" data-anim="love" data-cat="mood">爱心</button>
+        <button class="ghost" data-anim="angry" data-cat="mood">生气</button>
+        <button class="ghost" data-anim="shy" data-cat="mood">害羞</button>
+        <button class="ghost" data-anim="surprised" data-cat="mood">惊讶</button>
+        <button class="ghost" data-anim="dizzy" data-cat="mood">晕眩</button>
+        <button class="ghost" data-anim="confused" data-cat="mood">疑惑</button>
+        <button class="ghost" data-anim="wiggle" data-cat="mood">开心晃动</button>
+        <button class="ghost" data-anim="magic" data-cat="fx">魔法闪光</button>
+        <button class="ghost" data-anim="ice" data-cat="fx">冰晶吐息</button>
+        <button class="ghost" data-anim="fire" data-cat="fx">火焰吐息</button>
+        <button class="ghost" data-anim="roar" data-cat="fx">咆哮</button>
+        <button class="ghost" data-anim="shiver" data-cat="fx">发抖</button>
+        <button class="ghost" data-anim="think" data-cat="act">思考</button>
+        <button class="ghost" data-anim="clap" data-cat="act">鼓掌</button>
+        <button class="ghost" data-anim="bow" data-cat="act">鞠躬</button>
+        <button class="ghost" data-anim="peek" data-cat="mood">躲猫猫</button>
+        <button class="ghost" data-anim="dance" data-cat="act">跳舞</button>
+        <button class="ghost" data-anim="look" data-cat="basic">左右张望</button>
+        <button class="ghost" data-anim="bored" data-cat="mood">无聊发呆</button>
+        <button class="ghost" data-anim="jump" data-cat="act">开心大跳</button>
+        <button class="ghost" data-anim="kiss" data-cat="mood">亲亲</button>
+        <button class="ghost" data-anim="playdead" data-cat="mood">装死</button>
+        <button class="ghost" data-anim="spin" data-cat="act">转圈</button>
+        <button class="ghost" data-anim="sing" data-cat="mood">唱歌</button>
+        <button class="ghost" data-anim="tired" data-cat="mood">累了</button>
+        <button class="ghost" data-anim="cry" data-cat="mood">哭泣</button>
+        <button class="ghost" data-anim="showoff" data-cat="mood">炫耀</button>
+        <button class="ghost" data-anim="float" data-cat="act">漂浮</button>
+        <button class="ghost" data-anim="dash" data-cat="act">冲刺</button>
+        <button class="ghost" data-anim="defend" data-cat="act">防御</button>
+        <button class="ghost" data-anim="wash" data-cat="act">洗脸</button>
+        <button class="ghost" data-anim="scratch" data-cat="act">挠痒</button>
+        <button class="ghost" data-anim="lookup" data-cat="basic">抬头看</button>
+        <button class="ghost" data-anim="lookdown" data-cat="basic">低头看</button>
+        <button class="ghost" data-anim="turn" data-cat="act">转身</button>
+        <button class="ghost" data-anim="happytears" data-cat="mood">喜极而泣</button>
+        <button class="ghost" data-anim="wings" data-cat="basic">展大翼</button>
+        <button class="ghost" data-anim="charge" data-cat="fx">蓄力</button>
+      </div>
+      <div class="row">
+        <span class="label">尺寸</span>
+        <button class="ghost" data-size="220">小</button>
+        <button class="ghost active" data-size="280">中</button>
+        <button class="ghost" data-size="360">大</button>
+      </div>
+      <div class="row" id="poolBox">
+        <span class="label">轮播池</span>
+        <button class="ghost active" id="btnAll">全选</button>
+        <button class="ghost" id="btnNone">清空</button>
+        <button class="ghost" id="btnAuto">自动轮播关</button>
+        <span class="hint" id="poolCount">已选 20 / 20</span>
+      </div>
+      <div class="row" id="poolChecks" style="gap:8px 14px; padding-left:8px; display:flex; flex-wrap:wrap;"></div>
+      <div class="meta">
+        <div>帧规格<strong>256 × 256</strong></div>
+        <div>动画组<strong>50 行 × 8 帧</strong></div>
+        <div>素材<strong>spritesheet.webp</strong></div>
+      </div>
+      <p class="hint">点上方按钮立即播放；勾选「轮播池」决定自动轮播时用哪些动作（可多选）。可拖动幼龙在舞台内移动。</p>
+    </div>
+
+    <footer>
+      本地离线预览 · 不依赖网络<br />
+      正式 Mate 入口需等应用端支持后，在设置中加载 pets 目录
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("pet");
+    const ctx = canvas.getContext("2d");
+    const petWrap = document.getElementById("petWrap");
+    const stage = document.getElementById("stage");
+
+    const FW = 256, FH = 256, COLS = 8;
+    const LABELS = {
+      idle: "待机呼吸", blink: "眨眼张望", wing: "晶翼舒展", bounce: "开心跳跃",
+      sleep: "打盹睡觉", wave: "打招呼", magic: "魔法闪光", walk: "小步走",
+      stretch: "伸懒腰", sit: "坐下摇尾", ice: "冰晶吐息", wiggle: "开心晃动",
+      fly: "悬停飞行", eat: "吃水晶", love: "爱心", angry: "生气",
+      dizzy: "晕眩", roar: "咆哮", shy: "害羞", surprised: "惊讶",
+      nod: "点头", shiver: "发抖", fire: "火焰吐息", confused: "疑惑",
+      think: "思考", clap: "鼓掌", bow: "鞠躬", peek: "躲猫猫",
+      dance: "跳舞", look: "左右张望", bored: "无聊发呆", jump: "开心大跳",
+      kiss: "亲亲", playdead: "装死", spin: "转圈", sing: "唱歌",
+      tired: "累了", cry: "哭泣", showoff: "炫耀", float: "漂浮",
+      dash: "冲刺", defend: "防御", wash: "洗脸", scratch: "挠痒",
+      lookup: "抬头看", lookdown: "低头看", turn: "转身",
+      happytears: "喜极而泣", wings: "展大翼", charge: "蓄力"
+    };
+    const ANIMS = {
+      idle:   { row: 0, frames: 8, fps: 8 },
+      blink:  { row: 1, frames: 8, fps: 10 },
+      wing:   { row: 2, frames: 8, fps: 8 },
+      bounce: { row: 3, frames: 8, fps: 10 },
+      sleep:  { row: 4, frames: 8, fps: 6 },
+      wave:   { row: 5, frames: 8, fps: 8 },
+      magic:  { row: 6, frames: 8, fps: 10 },
+      walk:   { row: 7, frames: 8, fps: 10 },
+      stretch:{ row: 8, frames: 8, fps: 8 },
+      sit:    { row: 9, frames: 8, fps: 8 },
+      ice:    { row: 10, frames: 8, fps: 8 },
+      wiggle: { row: 11, frames: 8, fps: 10 },
+      fly:    { row: 12, frames: 8, fps: 10 },
+      eat:    { row: 13, frames: 8, fps: 8 },
+      love:   { row: 14, frames: 8, fps: 8 },
+      angry:  { row: 15, frames: 8, fps: 8 },
+      dizzy:  { row: 16, frames: 8, fps: 8 },
+      roar:   { row: 17, frames: 8, fps: 8 },
+      shy:    { row: 18, frames: 8, fps: 8 },
+      surprised:{ row: 19, frames: 8, fps: 10 },
+      nod:    { row: 20, frames: 8, fps: 8 },
+      shiver: { row: 21, frames: 8, fps: 10 },
+      fire:   { row: 22, frames: 8, fps: 8 },
+      confused:{ row: 23, frames: 8, fps: 8 },
+      think:  { row: 24, frames: 8, fps: 8 },
+      clap:   { row: 25, frames: 8, fps: 10 },
+      bow:    { row: 26, frames: 8, fps: 8 },
+      peek:   { row: 27, frames: 8, fps: 8 },
+      dance:  { row: 28, frames: 8, fps: 10 },
+      look:   { row: 29, frames: 8, fps: 8 },
+      bored:  { row: 30, frames: 8, fps: 6 },
+      jump:   { row: 31, frames: 8, fps: 10 },
+      kiss:   { row: 32, frames: 8, fps: 8 },
+      playdead:{ row: 33, frames: 8, fps: 8 },
+      spin:   { row: 34, frames: 8, fps: 10 },
+      sing:   { row: 35, frames: 8, fps: 8 },
+      tired:  { row: 36, frames: 8, fps: 6 },
+      cry:    { row: 37, frames: 8, fps: 8 },
+      showoff:{ row: 38, frames: 8, fps: 8 },
+      float:  { row: 39, frames: 8, fps: 8 },
+      dash:   { row: 40, frames: 8, fps: 12 },
+      defend: { row: 41, frames: 8, fps: 8 },
+      wash:   { row: 42, frames: 8, fps: 8 },
+      scratch:{ row: 43, frames: 8, fps: 8 },
+      lookup: { row: 44, frames: 8, fps: 8 },
+      lookdown:{ row: 45, frames: 8, fps: 8 },
+      turn:   { row: 46, frames: 8, fps: 8 },
+      happytears:{ row: 47, frames: 8, fps: 8 },
+      wings:  { row: 48, frames: 8, fps: 8 },
+      charge: { row: 49, frames: 8, fps: 10 },
+    };
+    const ALL_KEYS = Object.keys(ANIMS);
+    const pool = new Set(ALL_KEYS);
+    let autoOn = false;
+    let autoTimer = null;
+
+    const img = new Image();
+    let ready = false;
+    let animName = "idle";
+    let frame = 0;
+    let last = 0;
+    let onceDone = false;
+
+    img.onload = () => { ready = true; };
+    img.onerror = () => {
+      ctx.fillStyle = "#8aa0c0";
+      ctx.font = "14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("未能加载 spritesheet.webp", 128, 128);
+    };
+    // Same folder as this file, or sibling pet folder
+    img.src = "crystal-feather-dragon/spritesheet.webp";
+
+    function setAnim(name) {
+      animName = name;
+      frame = 0;
+      onceDone = false;
+      last = performance.now();
+      document.querySelectorAll("[data-anim]").forEach(b => {
+        b.classList.toggle("active", b.dataset.anim === name);
+      });
+      const lab = document.getElementById("nowLabel");
+      if (lab) lab.textContent = LABELS[name] || name;
+    }
+
+    // category filter
+    document.getElementById("catBtns").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-cat]");
+      if (!b) return;
+      const cat = b.dataset.cat;
+      document.querySelectorAll("#catBtns [data-cat]").forEach(x => x.classList.toggle("active", x === b));
+      let n = 0;
+      document.querySelectorAll("#animBtns [data-anim]").forEach(btn => {
+        const show = cat === "all" || btn.dataset.cat === cat;
+        btn.style.display = show ? "" : "none";
+        if (show) n++;
+      });
+      const hint = document.getElementById("animHint");
+      if (hint) hint.textContent = cat === "all" ? "(24)" : `(${n})`;
+    });
+
+    function poolList() {
+      return ALL_KEYS.filter(k => pool.has(k));
+    }
+
+    function updatePoolUI() {
+      const n = pool.size;
+      document.getElementById("poolCount").textContent = `已选 ${n} / ${ALL_KEYS.length}`;
+      document.querySelectorAll("#poolChecks input[type=checkbox]").forEach(cb => {
+        cb.checked = pool.has(cb.dataset.key);
+      });
+    }
+
+    // build multi-select pool checkboxes
+    const poolBox = document.getElementById("poolChecks");
+    ALL_KEYS.forEach(key => {
+      const label = document.createElement("label");
+      label.style.cssText = "display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none;";
+      label.innerHTML = `<input type="checkbox" data-key="${key}" checked /> ${LABELS[key]}`;
+      poolBox.appendChild(label);
+    });
+    poolBox.addEventListener("change", (e) => {
+      const cb = e.target;
+      if (cb && cb.dataset && cb.dataset.key) {
+        if (cb.checked) pool.add(cb.dataset.key);
+        else pool.delete(cb.dataset.key);
+        updatePoolUI();
+      }
+    });
+    document.getElementById("btnAll").addEventListener("click", () => {
+      ALL_KEYS.forEach(k => pool.add(k));
+      updatePoolUI();
+    });
+    document.getElementById("btnNone").addEventListener("click", () => {
+      pool.clear();
+      updatePoolUI();
+    });
+    document.getElementById("btnAuto").addEventListener("click", () => {
+      autoOn = !autoOn;
+      document.getElementById("btnAuto").textContent = autoOn ? "自动轮播开" : "自动轮播关";
+      document.getElementById("btnAuto").classList.toggle("active", autoOn);
+      if (autoOn) startAuto();
+      else if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+    });
+
+    function startAuto() {
+      if (autoTimer) clearInterval(autoTimer);
+      autoTimer = setInterval(() => {
+        if (!autoOn || dragging) return;
+        const list = poolList();
+        if (!list.length) return;
+        const cur = list.indexOf(animName);
+        const next = list[(cur + 1) % list.length];
+        setAnim(next);
+      }, 7000);
+    }
+    updatePoolUI();
+    if (autoOn) startAuto();
+
+    document.getElementById("animBtns").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-anim]");
+      if (b) setAnim(b.dataset.anim);
+    });
+
+    document.querySelectorAll("[data-size]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const s = +btn.dataset.size;
+        petWrap.style.width = s + "px";
+        petWrap.style.height = s + "px";
+        canvas.style.width = s + "px";
+        canvas.style.height = s + "px";
+        document.querySelectorAll("[data-size]").forEach(x => x.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    // Drag inside stage
+    let dragging = false, ox = 0, oy = 0;
+    let pos = { x: 0, y: 0 };
+    petWrap.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      petWrap.setPointerCapture(e.pointerId);
+      const r = petWrap.getBoundingClientRect();
+      ox = e.clientX - r.left;
+      oy = e.clientY - r.top;
+    });
+    petWrap.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const sr = stage.getBoundingClientRect();
+      const wr = petWrap.getBoundingClientRect();
+      let x = e.clientX - sr.left - ox;
+      let y = e.clientY - sr.top - oy;
+      x = Math.max(8, Math.min(sr.width - wr.width - 8, x));
+      y = Math.max(8, Math.min(sr.height - wr.height - 8, y));
+      pos.x = x - (sr.width - wr.width) / 2;
+      pos.y = y - (sr.height - wr.height) / 2;
+      petWrap.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+    });
+    petWrap.addEventListener("pointerup", () => { dragging = false; });
+    petWrap.addEventListener("pointercancel", () => { dragging = false; });
+
+    function loop(t) {
+      requestAnimationFrame(loop);
+      if (!ready) return;
+      const cfg = ANIMS[animName];
+      const interval = 1000 / cfg.fps;
+      if (t - last >= interval) {
+        last = t;
+        frame += 1;
+        if (frame >= cfg.frames) frame = 0;
+      }
+      ctx.clearRect(0, 0, FW, FH);
+      const sx = frame * FW;
+      const sy = cfg.row * FH;
+      ctx.drawImage(img, sx, sy, FW, FH, 0, 0, FW, FH);
+    }
+    requestAnimationFrame(loop);
+
+    document.querySelectorAll("[data-anim]").forEach(b => {
+      b.addEventListener("click", () => {
+        // keep auto running; user can still switch manually anytime
+      });
+    });
+  </script>
+</body>
+</html>
