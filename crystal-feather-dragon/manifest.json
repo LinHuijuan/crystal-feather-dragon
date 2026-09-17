@@ -1,13 +1,13 @@
 {
   "id": "crystal-feather-dragon",
   "name": "晶羽幼龙",
-  "description": "带晶体鳞片与半透明翼的写实 3D 奇幻小龙，含 50 组动画",
+  "description": "带晶体鳞片与半透明翼的写实 3D 奇幻小龙，含 54 组动画",
   "version": 1,
   "spritesheet": "spritesheet.webp",
   "frameWidth": 256,
   "frameHeight": 256,
   "columns": 8,
-  "totalFrames": 400,
+  "totalFrames": 432,
   "anchorX": 0.5,
   "animations": {
     "idle": { "row": 0, "frames": 8, "fps": 8, "loop": true },
@@ -59,6 +59,10 @@
     "turn": { "row": 46, "frames": 8, "fps": 8, "loop": true },
     "happytears": { "row": 47, "frames": 8, "fps": 8, "loop": true },
     "wings": { "row": 48, "frames": 8, "fps": 8, "loop": true },
-    "charge": { "row": 49, "frames": 8, "fps": 10, "loop": true }
+    "charge": { "row": 49, "frames": 8, "fps": 10, "loop": true },
+    "laugh": { "row": 50, "frames": 8, "fps": 10, "loop": true },
+    "heartpose": { "row": 51, "frames": 8, "fps": 8, "loop": true },
+    "cheer": { "row": 52, "frames": 8, "fps": 10, "loop": true },
+    "proud": { "row": 53, "frames": 8, "fps": 8, "loop": true }
   }
 }

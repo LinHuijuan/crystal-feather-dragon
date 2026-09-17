@@ -199,7 +199,7 @@
   <div class="wrap">
     <header>
       <h1>晶羽幼龙</h1>
-      <p>写实 3D 风格桌面伙伴预览 · 50 组动画 · 分类筛选 + 多选轮播</p>
+      <p>写实 3D 风格桌面伙伴预览 · 54 组动画 · 分类筛选 + 多选轮播</p>
     </header>
 
     <div class="stage" id="stage">
@@ -275,6 +275,10 @@
         <button class="ghost" data-anim="happytears" data-cat="mood">喜极而泣</button>
         <button class="ghost" data-anim="wings" data-cat="basic">展大翼</button>
         <button class="ghost" data-anim="charge" data-cat="fx">蓄力</button>
+        <button class="ghost" data-anim="laugh" data-cat="mood">大笑</button>
+        <button class="ghost" data-anim="heartpose" data-cat="mood">比心</button>
+        <button class="ghost" data-anim="cheer" data-cat="mood">加油</button>
+        <button class="ghost" data-anim="proud" data-cat="mood">骄傲</button>
       </div>
       <div class="row">
         <span class="label">尺寸</span>
@@ -292,7 +296,7 @@
       <div class="row" id="poolChecks" style="gap:8px 14px; padding-left:8px; display:flex; flex-wrap:wrap;"></div>
       <div class="meta">
         <div>帧规格<strong>256 × 256</strong></div>
-        <div>动画组<strong>50 行 × 8 帧</strong></div>
+        <div>动画组<strong>54 行 × 8 帧</strong></div>
         <div>素材<strong>spritesheet.webp</strong></div>
       </div>
       <p class="hint">点上方按钮立即播放；勾选「轮播池」决定自动轮播时用哪些动作（可多选）。可拖动幼龙在舞台内移动。</p>
@@ -324,7 +328,8 @@
       tired: "累了", cry: "哭泣", showoff: "炫耀", float: "漂浮",
       dash: "冲刺", defend: "防御", wash: "洗脸", scratch: "挠痒",
       lookup: "抬头看", lookdown: "低头看", turn: "转身",
-      happytears: "喜极而泣", wings: "展大翼", charge: "蓄力"
+      happytears: "喜极而泣", wings: "展大翼", charge: "蓄力",
+      laugh: "大笑", heartpose: "比心", cheer: "加油", proud: "骄傲"
     };
     const ANIMS = {
       idle:   { row: 0, frames: 8, fps: 8 },
@@ -377,6 +382,10 @@
       happytears:{ row: 47, frames: 8, fps: 8 },
       wings:  { row: 48, frames: 8, fps: 8 },
       charge: { row: 49, frames: 8, fps: 10 },
+      laugh:  { row: 50, frames: 8, fps: 10 },
+      heartpose:{ row: 51, frames: 8, fps: 8 },
+      cheer:  { row: 52, frames: 8, fps: 10 },
+      proud:  { row: 53, frames: 8, fps: 8 },
     };
     const ALL_KEYS = Object.keys(ANIMS);
     const pool = new Set(ALL_KEYS);
