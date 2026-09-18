@@ -401,12 +401,22 @@
 
     img.onload = () => { ready = true; };
     img.onerror = () => {
+      // fallback: try sibling file, then absolute-ish relative
+      if (!img.dataset.tried) {
+        img.dataset.tried = "1";
+        img.src = "./spritesheet.webp";
+        return;
+      }
+      if (img.dataset.tried === "1") {
+        img.dataset.tried = "2";
+        img.src = "crystal-feather-dragon/spritesheet.webp";
+        return;
+      }
       ctx.fillStyle = "#8aa0c0";
       ctx.font = "14px sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("未能加载 spritesheet.webp", 128, 128);
     };
-    // Same folder as this file, or sibling pet folder
     img.src = "crystal-feather-dragon/spritesheet.webp";
 
     function setAnim(name) {
